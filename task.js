@@ -3,6 +3,7 @@
 const vsSource = `#version 300 es
 in vec3 aPosition;
 in vec3 aNormal;
+uniform vec3 uLightDirection;
 uniform mat4 uProjectionMatrix_Y;
 uniform mat4 uProjectionMatrix_Z;
 uniform mat4 uPerspectiveMatrix;
@@ -63,9 +64,12 @@ function main() {
     const uPerspectiveMatrix = gl.getUniformLocation(program,"uPerspectiveMatrix");
     const uModelViewMatrix = gl.getUniformLocation(program, "uModelViewMatrix");
     const uAmbientColor = gl.getUniformLocation(program,'uAmbientColor');
+    const uLightDirection = gl.getUniformLocation(program,'uLightDirection');
 
     const ambientColor = [0, 1, 0];
+    const lightDirection = [1 ,1, 1];
     gl.uniform3f(uAmbientColor, ...ambientColor);
+    gl.uniform3f(uLightDirection, ...lightDirection);
 
     const bufferData = new Float32Array([
         -.5,-.5,-.5,    -1, 0, 0,
