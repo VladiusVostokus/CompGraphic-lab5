@@ -12,7 +12,8 @@ out float vBrightness;
 
 void main() {
     vec3 lightDirectionNormalazed = normalize(uLightDirection);
-    vBrightness = max(dot(lightDirectionNormalazed, aNormal), 0.0);
+    vec3 modeledNormal = mat3(uModelViewMatrix) * aNormal;
+    vBrightness = max(dot(lightDirectionNormalazed, modeledNormal), 0.0);
     gl_Position = uPerspectiveMatrix * uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aPosition, 1.0);
 }`;
 
@@ -72,9 +73,9 @@ function main() {
     const uLightColor = gl.getUniformLocation(program,'uLightColor');
     const uLightDirection = gl.getUniformLocation(program,'uLightDirection');
 
-    const ambientColor = [0, 0.5, 0];
+    const ambientColor = [0, 0.3, 0];
     const lightColor = [0.8, 0.8, 0.8];
-    const lightDirection = [1 ,1, 1];
+    const lightDirection = [1 ,1, -1];
     gl.uniform3f(uAmbientColor, ...ambientColor);
     gl.uniform3f(uLightColor, ...lightColor);
     gl.uniform3f(uLightDirection, ...lightDirection);
@@ -166,7 +167,7 @@ function main() {
     const draw = () => {
         gl.clearColor(0, 0, 0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        const angle = 30;
+        const angle = -20;
         const radian = Math.PI * angle / 180;
         const cos = Math.cos(radian);
         const sin = Math.sin(radian);
