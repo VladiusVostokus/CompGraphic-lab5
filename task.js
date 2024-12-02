@@ -1,8 +1,6 @@
 'use strict';
 
 const vsSource = `#version 300 es
-in vec3 aColor;
-out vec3 vColor;
 in vec3 aPosition;
 uniform mat4 uProjectionMatrix_Y;
 uniform mat4 uProjectionMatrix_Z;
@@ -11,17 +9,16 @@ uniform mat4 uModelViewMatrix;
 
 void main() {
     gl_Position = uPerspectiveMatrix * (uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aPosition, 1.0));
-    vColor = aColor;
 }`;
 
 const fsSource = `#version 300 es
 precision mediump float;
 
-in vec3 vColor;
 out vec4 fragColor;
+uniform vec3 uAmbientColor;
 
 void main() {
-    fragColor = vec4(vColor, 1.0);
+    fragColor = vec4(uAmbientColor, 1.0);
 }`;
 
 function main() {
@@ -58,66 +55,66 @@ function main() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.useProgram(program);
 
-    const aColor = gl.getAttribLocation(program,'aColor');
     const aPosition = gl.getAttribLocation(program, 'aPosition');
     const uProjectionMatrix_Y = gl.getUniformLocation(program,'uProjectionMatrix_Y');
     const uProjectionMatrix_Z = gl.getUniformLocation(program,'uProjectionMatrix_Z');
     const uPerspectiveMatrix = gl.getUniformLocation(program,"uPerspectiveMatrix");
     const uModelViewMatrix = gl.getUniformLocation(program, "uModelViewMatrix");
+    const uAmbientColor = gl.getUniformLocation(program,'uAmbientColor');
+
+    const ambientColor = [0, 1, 0];
+    gl.uniform3f(uAmbientColor, ...ambientColor);
 
     const bufferData = new Float32Array([
-        -.5,-.5,-.5,   0,1,0,
-        -.5, .5, .5,   0,1,0,
-        -.5, .5,-.5,   0,1,0,
-        -.5,-.5, .5,   0,1,0,
-        -.5, .5, .5,   0,1,0,
-        -.5,-.5,-.5,   0,1,0,
+        -.5,-.5,-.5,
+        -.5, .5, .5,
+        -.5, .5,-.5,
+        -.5,-.5, .5, 
+        -.5, .5, .5,   
+        -.5,-.5,-.5,   
     
-        .5 ,-.5,-.5,   0,1,0,
-        .5 , .5,-.5,   0,1,0,
-        .5 , .5, .5,   0,1,0,
-        .5 , .5, .5,   0,1,0,
-        .5 ,-.5, .5,   0,1,0,
-        .5 ,-.5,-.5,   0,1,0,
+        .5 ,-.5,-.5,
+        .5 , .5,-.5,
+        .5 , .5, .5,
+        .5 , .5, .5,
+        .5 ,-.5, .5,
+        .5 ,-.5,-.5,
     
-        -.5,-.5,-.5,   0,1,0,
-         .5,-.5,-.5,   0,1,0,
-         .5,-.5, .5,   0,1,0,
-         .5,-.5, .5,   0,1,0,
-        -.5,-.5, .5,   0,1,0,
-        -.5,-.5,-.5,   0,1,0,
+        -.5,-.5,-.5,
+         .5,-.5,-.5,
+         .5,-.5, .5,
+         .5,-.5, .5,
+        -.5,-.5, .5,
+        -.5,-.5,-.5,
     
-        -.5, .5,-.5,   0,1,0,
-         .5, .5, .5,   0,1,0,
-         .5, .5,-.5,   0,1,0,
-        -.5, .5, .5,   0,1,0,
-         .5, .5, .5,   0,1,0,
-        -.5, .5,-.5,   0,1,0,
+        -.5, .5,-.5,
+         .5, .5, .5,
+         .5, .5,-.5,
+        -.5, .5, .5,
+         .5, .5, .5,
+        -.5, .5,-.5,
     
-         .5,-.5,-.5,   0,1,0,
-        -.5,-.5,-.5,   0,1,0,
-         .5, .5,-.5,   0,1,0,
-        -.5, .5,-.5,   0,1,0,
-         .5, .5,-.5,   0,1,0,
-        -.5,-.5,-.5,   0,1,0,
+         .5,-.5,-.5,
+        -.5,-.5,-.5,
+         .5, .5,-.5,
+        -.5, .5,-.5,
+         .5, .5,-.5,
+        -.5,-.5,-.5,
     
-        -.5,-.5, .5,   0,1,0,
-         .5,-.5, .5,   0,1,0,
-         .5, .5, .5,   0,1,0,
-         .5, .5, .5,   0,1,0,
-        -.5, .5, .5,   0,1,0,
-        -.5,-.5, .5,   0,1,0,
+        -.5,-.5, .5,
+         .5,-.5, .5,
+         .5, .5, .5,
+         .5, .5, .5,
+        -.5, .5, .5,
+        -.5,-.5, .5,
     ]);
     const buffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
 
-    gl.vertexAttribPointer(aPosition, 3 , gl.FLOAT, false, 6 * 4, 0);
-    gl.vertexAttribPointer(aColor, 3 , gl.FLOAT, false, 6 * 4, 3 * 4);
-
+    gl.vertexAttribPointer(aPosition, 3 , gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(aPosition);
-    gl.enableVertexAttribArray(aColor);
     
     const fovY = Math.PI / 4;
     const aspectRatio = canvas.width / canvas.height
