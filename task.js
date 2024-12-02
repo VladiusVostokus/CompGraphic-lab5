@@ -2,6 +2,7 @@
 
 const vsSource = `#version 300 es
 in vec3 aPosition;
+in vec3 aNormal;
 uniform mat4 uProjectionMatrix_Y;
 uniform mat4 uProjectionMatrix_Z;
 uniform mat4 uPerspectiveMatrix;
@@ -56,6 +57,7 @@ function main() {
     gl.useProgram(program);
 
     const aPosition = gl.getAttribLocation(program, 'aPosition');
+    const aNormal = gl.getAttribLocation(program, 'aNormal');
     const uProjectionMatrix_Y = gl.getUniformLocation(program,'uProjectionMatrix_Y');
     const uProjectionMatrix_Z = gl.getUniformLocation(program,'uProjectionMatrix_Z');
     const uPerspectiveMatrix = gl.getUniformLocation(program,"uPerspectiveMatrix");
@@ -66,55 +68,57 @@ function main() {
     gl.uniform3f(uAmbientColor, ...ambientColor);
 
     const bufferData = new Float32Array([
-        -.5,-.5,-.5,
-        -.5, .5, .5,
-        -.5, .5,-.5,
-        -.5,-.5, .5, 
-        -.5, .5, .5,   
-        -.5,-.5,-.5,   
+        -.5,-.5,-.5,    -1, 0, 0,
+        -.5, .5, .5,    -1, 0, 0,
+        -.5, .5,-.5,    -1, 0, 0,
+        -.5,-.5, .5,    -1, 0, 0,
+        -.5, .5, .5,    -1, 0, 0,
+        -.5,-.5,-.5,    -1, 0, 0,
     
-        .5 ,-.5,-.5,
-        .5 , .5,-.5,
-        .5 , .5, .5,
-        .5 , .5, .5,
-        .5 ,-.5, .5,
-        .5 ,-.5,-.5,
+        .5 ,-.5,-.5,    1, 0, 0,
+        .5 , .5,-.5,    1, 0, 0,
+        .5 , .5, .5,    1, 0, 0,
+        .5 , .5, .5,    1, 0, 0,
+        .5 ,-.5, .5,    1, 0, 0,
+        .5 ,-.5,-.5,    1, 0, 0,
     
-        -.5,-.5,-.5,
-         .5,-.5,-.5,
-         .5,-.5, .5,
-         .5,-.5, .5,
-        -.5,-.5, .5,
-        -.5,-.5,-.5,
+        -.5,-.5,-.5,    0, -1, 0,
+         .5,-.5,-.5,    0, -1, 0,
+         .5,-.5, .5,    0, -1, 0,
+         .5,-.5, .5,    0, -1, 0,
+        -.5,-.5, .5,    0, -1, 0,
+        -.5,-.5,-.5,    0, -1, 0,
     
-        -.5, .5,-.5,
-         .5, .5, .5,
-         .5, .5,-.5,
-        -.5, .5, .5,
-         .5, .5, .5,
-        -.5, .5,-.5,
+        -.5, .5,-.5,    0, 1, 0,
+         .5, .5, .5,    0, 1, 0,
+         .5, .5,-.5,    0, 1, 0,
+        -.5, .5, .5,    0, 1, 0,
+         .5, .5, .5,    0, 1, 0,
+        -.5, .5,-.5,    0, 1, 0,
     
-         .5,-.5,-.5,
-        -.5,-.5,-.5,
-         .5, .5,-.5,
-        -.5, .5,-.5,
-         .5, .5,-.5,
-        -.5,-.5,-.5,
+         .5,-.5,-.5,    0, 0, -1,
+        -.5,-.5,-.5,    0, 0, -1,
+         .5, .5,-.5,    0, 0, -1,
+        -.5, .5,-.5,    0, 0, -1,
+         .5, .5,-.5,    0, 0, -1,
+        -.5,-.5,-.5,    0, 0, -1,
     
-        -.5,-.5, .5,
-         .5,-.5, .5,
-         .5, .5, .5,
-         .5, .5, .5,
-        -.5, .5, .5,
-        -.5,-.5, .5,
+        -.5,-.5, .5,    0, 0, 1,
+         .5,-.5, .5,    0, 0, 1,
+         .5, .5, .5,    0, 0, 1,
+         .5, .5, .5,    0, 0, 1,
+        -.5, .5, .5,    0, 0, 1,
+        -.5,-.5, .5,    0, 0, 1,
     ]);
     const buffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
 
-    gl.vertexAttribPointer(aPosition, 3 , gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(aPosition, 3 , gl.FLOAT, false, 6 * 4, 0);
+    gl.vertexAttribPointer(aNormal, 3 , gl.FLOAT, false, 6 * 4, 3 * 4);
     gl.enableVertexAttribArray(aPosition);
+    gl.enableVertexAttribArray(aNormal);
     
     const fovY = Math.PI / 4;
     const aspectRatio = canvas.width / canvas.height
