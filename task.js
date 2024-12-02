@@ -8,19 +8,24 @@ uniform mat4 uProjectionMatrix_Y;
 uniform mat4 uProjectionMatrix_Z;
 uniform mat4 uPerspectiveMatrix;
 uniform mat4 uModelViewMatrix;
+out float vBrightness;
 
 void main() {
-    gl_Position = uPerspectiveMatrix * (uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aPosition, 1.0));
+    vec3 lightDirectionNormalazed = normalize(uLightDirection);
+    vBrightness = max(dot(lightDirectionNormalazed, aNormal), 0.0);
+    gl_Position = uPerspectiveMatrix * uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aPosition, 1.0);
 }`;
 
 const fsSource = `#version 300 es
 precision mediump float;
 
+in float vBrightness;
 out vec4 fragColor;
 uniform vec3 uAmbientColor;
+uniform vec3 uLightColor;
 
 void main() {
-    fragColor = vec4(uAmbientColor, 1.0);
+    fragColor = vec4(uAmbientColor + uLightColor * vBrightness, 1.0);
 }`;
 
 function main() {
@@ -64,11 +69,14 @@ function main() {
     const uPerspectiveMatrix = gl.getUniformLocation(program,"uPerspectiveMatrix");
     const uModelViewMatrix = gl.getUniformLocation(program, "uModelViewMatrix");
     const uAmbientColor = gl.getUniformLocation(program,'uAmbientColor');
+    const uLightColor = gl.getUniformLocation(program,'uLightColor');
     const uLightDirection = gl.getUniformLocation(program,'uLightDirection');
 
-    const ambientColor = [0, 1, 0];
+    const ambientColor = [0, 0.5, 0];
+    const lightColor = [0.8, 0.8, 0.8];
     const lightDirection = [1 ,1, 1];
     gl.uniform3f(uAmbientColor, ...ambientColor);
+    gl.uniform3f(uLightColor, ...lightColor);
     gl.uniform3f(uLightDirection, ...lightDirection);
 
     const bufferData = new Float32Array([
@@ -121,11 +129,12 @@ function main() {
 
     gl.vertexAttribPointer(aPosition, 3 , gl.FLOAT, false, 6 * 4, 0);
     gl.vertexAttribPointer(aNormal, 3 , gl.FLOAT, false, 6 * 4, 3 * 4);
+
     gl.enableVertexAttribArray(aPosition);
     gl.enableVertexAttribArray(aNormal);
     
     const fovY = Math.PI / 4;
-    const aspectRatio = canvas.width / canvas.height
+    const aspectRatio = canvas.width / canvas.height;
 
     const perspective = (fovy, aspect, near, far) => {
         var f = Math.tan(Math.PI * 0.5 - 0.5 * fovy);
@@ -155,7 +164,7 @@ function main() {
     }
 
     const draw = () => {
-        gl.clearColor(0, 0.3, 0, 1.0);
+        gl.clearColor(0, 0, 0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         const angle = 30;
         const radian = Math.PI * angle / 180;
