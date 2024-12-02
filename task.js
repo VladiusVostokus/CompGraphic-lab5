@@ -11,8 +11,8 @@ uniform mat4 uModelViewMatrix;
 out float vBrightness;
 
 void main() {
-    vec3 lightDirectionNormalazed = normalize(uLightDirection);
-    vec3 modeledNormal = mat3(uModelViewMatrix) * aNormal;
+    vec4 lightDirectionNormalazed = normalize(vec4(uLightDirection, 1.0));
+    vec4 modeledNormal = uPerspectiveMatrix * uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aNormal, 1.0);
     vBrightness = max(dot(lightDirectionNormalazed, modeledNormal), 0.0);
     gl_Position = uPerspectiveMatrix * uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aPosition, 1.0);
 }`;
@@ -164,14 +164,16 @@ function main() {
         return matrix;
     }
 
+    let angle = 0.0;
+
     const draw = () => {
         gl.clearColor(0, 0, 0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        const angle = -20;
         const radian = Math.PI * angle / 180;
         const cos = Math.cos(radian);
         const sin = Math.sin(radian);
-
+        if (angle === 360.0) angle = 0.0;
+        angle++;
         const modelViewMatrix = translate([0, -0.3, -3.5]);
         const perspectiveMatrix = perspective(fovY, aspectRatio, 0.1, 10);
 
@@ -194,6 +196,7 @@ function main() {
         gl.uniformMatrix4fv(uPerspectiveMatrix, false, perspectiveMatrix);
         gl.uniformMatrix4fv(uModelViewMatrix, false, modelViewMatrix)
         gl.drawArrays(gl.TRIANGLES, 0, 36);
+        requestAnimationFrame(draw)
     };
     draw();
 }
