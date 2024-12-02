@@ -13,7 +13,8 @@ out float vBrightness;
 void main() {
     vec4 lightDirectionNormalazed = normalize(vec4(uLightDirection, 1.0));
     vec4 modeledNormal = uPerspectiveMatrix * uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aNormal, 1.0);
-    vBrightness = max(dot(lightDirectionNormalazed, modeledNormal), 0.0);
+    vec4 normalizedNormal = normalize(modeledNormal);
+    vBrightness = max(dot(lightDirectionNormalazed, normalizedNormal), 0.0);
     gl_Position = uPerspectiveMatrix * uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aPosition, 1.0);
 }`;
 
