@@ -3,31 +3,33 @@
 const vsSource = `#version 300 es
 in vec3 aPosition;
 in vec3 aNormal;
-uniform vec3 uLightDirection;
 uniform mat4 uProjectionMatrix_Y;
 uniform mat4 uProjectionMatrix_Z;
 uniform mat4 uPerspectiveMatrix;
 uniform mat4 uModelViewMatrix;
-out float vBrightness;
+out vec4 vNormal;
 
 void main() {
-    vec4 lightDirectionNormalazed = normalize(vec4(uLightDirection, 1.0));
     vec4 modeledNormal = uPerspectiveMatrix * uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aNormal, 1.0);
     vec4 normalizedNormal = normalize(modeledNormal);
-    vBrightness = max(dot(lightDirectionNormalazed, normalizedNormal), 0.0);
     gl_Position = uPerspectiveMatrix * uModelViewMatrix * uProjectionMatrix_Y * uProjectionMatrix_Z * vec4(aPosition, 1.0);
+    vNormal = normalizedNormal;
 }`;
 
 const fsSource = `#version 300 es
 precision mediump float;
 
-in float vBrightness;
+in vec4 vNormal;
 out vec4 fragColor;
 uniform vec3 uAmbientColor;
 uniform vec3 uLightColor;
+uniform vec3 uLightDirection;
 
 void main() {
-    fragColor = vec4(uAmbientColor + uLightColor * vBrightness, 1.0);
+    vec4 lightDirectionNormalazed = normalize(vec4(uLightDirection, 1.0));
+    vec4 normal = normalize(vNormal);
+    float brightness = max(dot(lightDirectionNormalazed, normal), 0.0);
+    fragColor = vec4(uAmbientColor + uLightColor * brightness, 1.0);
 }`;
 
 function main() {
@@ -88,35 +90,35 @@ function main() {
         -.5,-.5, .5,    -1, 0, 0,
         -.5, .5, .5,    -1, 0, 0,
         -.5,-.5,-.5,    -1, 0, 0,
-    
+
         .5 ,-.5,-.5,    1, 0, 0,
         .5 , .5,-.5,    1, 0, 0,
         .5 , .5, .5,    1, 0, 0,
         .5 , .5, .5,    1, 0, 0,
         .5 ,-.5, .5,    1, 0, 0,
         .5 ,-.5,-.5,    1, 0, 0,
-    
+
         -.5,-.5,-.5,    0, -1, 0,
          .5,-.5,-.5,    0, -1, 0,
          .5,-.5, .5,    0, -1, 0,
          .5,-.5, .5,    0, -1, 0,
         -.5,-.5, .5,    0, -1, 0,
         -.5,-.5,-.5,    0, -1, 0,
-    
+
         -.5, .5,-.5,    0, 1, 0,
          .5, .5, .5,    0, 1, 0,
          .5, .5,-.5,    0, 1, 0,
         -.5, .5, .5,    0, 1, 0,
          .5, .5, .5,    0, 1, 0,
         -.5, .5,-.5,    0, 1, 0,
-    
+
          .5,-.5,-.5,    0, 0, -1,
         -.5,-.5,-.5,    0, 0, -1,
          .5, .5,-.5,    0, 0, -1,
         -.5, .5,-.5,    0, 0, -1,
          .5, .5,-.5,    0, 0, -1,
         -.5,-.5,-.5,    0, 0, -1,
-    
+
         -.5,-.5, .5,    0, 0, 1,
          .5,-.5, .5,    0, 0, 1,
          .5, .5, .5,    0, 0, 1,
@@ -134,7 +136,7 @@ function main() {
 
     gl.enableVertexAttribArray(aPosition);
     gl.enableVertexAttribArray(aNormal);
-    
+
     const fovY = Math.PI / 4;
     const aspectRatio = canvas.width / canvas.height;
 
@@ -199,7 +201,7 @@ function main() {
             0,-sin,cos,0,
             0,0,0,1,
         ]);
-        
+
         gl.uniformMatrix4fv(uProjectionMatrix_Y, false, projectionMatrix_Y);
         gl.uniformMatrix4fv(uProjectionMatrix_Z, false, projectionMatrix_Z);
         gl.uniformMatrix4fv(uPerspectiveMatrix, false, perspectiveMatrix);
