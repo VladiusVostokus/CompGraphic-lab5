@@ -4,7 +4,6 @@ const vsSource = `#version 300 es
 in vec3 aPosition;
 in vec3 aNormal;
 uniform mat4 uTransformMatrix;
-uniform mat4 uProjectionMatrix_Z;
 uniform mat4 uPerspectiveMatrix;
 uniform mat4 uModelViewMatrix;
 out vec4 vNormal;
