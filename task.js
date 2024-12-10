@@ -77,7 +77,7 @@ function main() {
 
     const ambientColor = [0, 0.3, 0];
     const lightColor = [1, 1, 1];
-    const lightDirection = [1 ,1, -1];
+    const lightDirection = [1 ,1, -0.5];
     gl.uniform3f(uAmbientColor, ...ambientColor);
     gl.uniform3f(uLightColor, ...lightColor);
     gl.uniform3f(uLightDirection, ...lightDirection);
@@ -131,7 +131,7 @@ function main() {
     gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
 
     gl.vertexAttribPointer(aPosition, 3 , gl.FLOAT, false, 6 * 4, 0);
-    gl.vertexAttribPointer(aNormal, 3 , gl.FLOAT, false, 6 * 4, 0);
+    gl.vertexAttribPointer(aNormal, 3 , gl.FLOAT, false, 6 * 4, 3 * 4);
 
     gl.enableVertexAttribArray(aPosition);
     gl.enableVertexAttribArray(aNormal);
@@ -164,15 +164,6 @@ function main() {
         matrix[14] = matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14];
         matrix[15] = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
         return matrix;
-    }
-
-    const transpose = (m) => {
-        return [
-            m[0], m[4], m[8], m[12],
-            m[1], m[5], m[9], m[13],
-            m[2], m[6], m[10], m[14],
-            m[3], m[7], m[11], m[15],
-        ];
     }
 
     const multiply = (a, b) => {
